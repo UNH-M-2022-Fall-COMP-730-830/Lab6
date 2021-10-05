@@ -34,6 +34,13 @@ public class MainActivity extends AppCompatActivity implements
     private ProgressBar progress;
     private ForecastAdapter adapter;
 
+    private MainActivityState state;
+
+    public void setState(MainActivityState state) {
+        this.state = state;
+        state.enter();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,9 +51,8 @@ public class MainActivity extends AppCompatActivity implements
         initProgress();
         initErrorView();
 
-        refreshForecast();
+        setState(new Loading());
 
-        // Register Observer
         Preferences.getInstance().registerObserver(this);
     }
 
@@ -55,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements
         String cityName = Preferences.getInstance().getCity();
         toolbar.setTitle(cityName);
         toolbar.setOnMenuItemClickListener(item -> {
-            if(item.getItemId() == R.id.settings) {
+            if (item.getItemId() == R.id.settings) {
                 Intent activity = new Intent(this, SettingsActivity.class);
                 startActivity(activity);
                 return true;
@@ -81,40 +87,21 @@ public class MainActivity extends AppCompatActivity implements
         retryButton.setOnClickListener(v -> refreshForecast());
     }
 
-    private void showProgress() {
-        progress.setVisibility(View.VISIBLE);
-        errorView.setVisibility(View.GONE);
-        listView.setVisibility(View.GONE);
-    }
-
-    private void showError(Exception error) {
-        progress.setVisibility(View.GONE);
-        errorView.setVisibility(View.VISIBLE);
-        listView.setVisibility(View.GONE);
-    }
-
-    private void showData(List<Forecast> data) {
-        adapter.setData(data);
-
-        progress.setVisibility(View.GONE);
-        errorView.setVisibility(View.GONE);
-        listView.setVisibility(View.VISIBLE);
-    }
-
     private void refreshForecast() {
-        showProgress();
-        WeatherAPI.requestForecast(this);
+        // Delegate refresh to current state
+        state.refresh();
     }
 
     @Override
     public void onResult(List<Forecast> data) {
-        showData(data);
+        // Delegate data handling to current state
+        state.newData(data);
     }
 
     @Override
     public void onError(Exception e) {
-        e.printStackTrace();
-        showError(e);
+        // Delegate error handling to current state
+        state.error(e);
     }
 
     @Override
@@ -126,7 +113,6 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void preferenceChanged(String key, Object value) {
-        // We got notified that something changed in the Preferences!
         refreshForecast();
         if (key.equals(Preferences.CITY_KEY) && value instanceof String) {
             toolbar.setTitle((String) value);
@@ -136,7 +122,98 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Unregister observer to avoid memory leaks
         Preferences.getInstance().unregisterObserver(this);
+    }
+
+    // MainActivity States. Implemented as inner classes to get full access to the MainActivity methods and attributes.
+
+    class Loading implements MainActivityState {
+        @Override
+        public void enter() {
+            progress.setVisibility(View.VISIBLE);
+            errorView.setVisibility(View.GONE);
+            listView.setVisibility(View.GONE);
+
+            WeatherAPI.requestForecast(MainActivity.this);
+        }
+
+        @Override
+        public void refresh() {
+            // Already loading
+        }
+
+        @Override
+        public void newData(List<Forecast> data) {
+            setState(new Loaded(data));
+        }
+
+        @Override
+        public void error(Exception e) {
+            setState(new Error(e));
+        }
+    }
+
+    class Loaded implements MainActivityState {
+        private List<Forecast> data;
+
+        public Loaded(List<Forecast> data) {
+            this.data = data;
+        }
+
+        @Override
+        public void enter() {
+            adapter.setData(data);
+
+            progress.setVisibility(View.GONE);
+            errorView.setVisibility(View.GONE);
+            listView.setVisibility(View.VISIBLE);
+
+        }
+
+        @Override
+        public void refresh() {
+            setState(new Loading());
+        }
+
+        @Override
+        public void newData(List<Forecast> data) {
+            // Receiving new data in this state is disabled
+        }
+
+        @Override
+        public void error(Exception e) {
+            // Receiving errors in this state is disabled
+        }
+    }
+
+    class Error implements MainActivityState {
+        private Exception error;
+
+        public Error(Exception error) {
+            this.error = error;
+        }
+
+        @Override
+        public void enter() {
+            error.printStackTrace();
+            progress.setVisibility(View.GONE);
+            errorView.setVisibility(View.VISIBLE);
+            listView.setVisibility(View.GONE);
+        }
+
+        @Override
+        public void refresh() {
+            setState(new Loading());
+        }
+
+        @Override
+        public void newData(List<Forecast> data) {
+            // Receiving new data in this state is disabled
+        }
+
+        @Override
+        public void error(Exception e) {
+            // Already got an error
+        }
     }
 }
