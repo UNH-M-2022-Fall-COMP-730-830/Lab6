@@ -4,13 +4,19 @@ import android.content.SharedPreferences;
 
 import com.example.weather.Application;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Preferences {
-    private final String CITY_KEY = "CITY";
-    private final String CITY_DEFAULT = "Manchester, NH";
-    private final String UNITS_KEY = "UNITS";
-    private final String UNITS_DEFAULT = "I";
+    public final static String CITY_KEY = "CITY";
+    private final static String CITY_DEFAULT = "Manchester, NH";
+    public final static String UNITS_KEY = "UNITS";
+    private final static String UNITS_DEFAULT = "I";
 
     private static Preferences INSTANCE;
+
+    // List of observers
+    private final List<PreferenceObserver> observerCollection = new ArrayList<>();
 
     private Preferences() {
     }
@@ -30,6 +36,7 @@ public class Preferences {
     public void setCity(String value) {
         SharedPreferences pref = Application.getSharedPreferences();
         pref.edit().putString(CITY_KEY, value).apply();
+        notifyPreferenceChanged(CITY_KEY, value); // Notify about city name change
     }
 
     public String getUnits() {
@@ -39,5 +46,23 @@ public class Preferences {
     public void setUnits(String value) {
         SharedPreferences pref = Application.getSharedPreferences();
         pref.edit().putString(UNITS_KEY, value).apply();
+        notifyPreferenceChanged(UNITS_KEY, value); // Notify about units change
+    }
+
+    // Add new subscriber
+    public void registerObserver(PreferenceObserver observer) {
+        observerCollection.add(observer);
+    }
+
+    // Unsubscribe
+    public void unregisterObserver(PreferenceObserver observer) {
+        observerCollection.remove(observer);
+    }
+
+    // Notify all subscribers
+    private void notifyPreferenceChanged(String key, Object value) {
+        for (PreferenceObserver observer : observerCollection) {
+            observer.preferenceChanged(key, value);
+        }
     }
 }

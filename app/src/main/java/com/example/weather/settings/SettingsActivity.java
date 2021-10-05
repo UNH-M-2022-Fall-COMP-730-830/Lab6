@@ -12,9 +12,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.weather.R;
+import com.example.weather.preferences.PreferenceObserver;
 import com.example.weather.preferences.Preferences;
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity implements PreferenceObserver {
 
     private TextView cityName;
 
@@ -26,6 +27,9 @@ public class SettingsActivity extends AppCompatActivity {
         initToolbar();
         initCityView();
         initUnits();
+
+        // Register Observer
+        Preferences.getInstance().registerObserver(this);
     }
 
     private void initToolbar() {
@@ -95,6 +99,21 @@ public class SettingsActivity extends AppCompatActivity {
             })
             .setNegativeButton(R.string.city_dialog_cancel, (dialog, which) -> dialog.dismiss())
             .show();
+    }
+
+    @Override
+    public void preferenceChanged(String key, Object value) {
+        // We got notified that something changed in the Preferences!
+        if (key.equals(Preferences.CITY_KEY) && value instanceof String) {
+            cityName.setText((String) value);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Unregister observer to avoid memory leaks
+        Preferences.getInstance().unregisterObserver(this);
     }
 }
 

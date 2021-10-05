@@ -15,13 +15,17 @@ import com.example.weather.data.Forecast;
 import com.example.weather.details.DetailsActivity;
 import com.example.weather.network.NetworkRequestCallback;
 import com.example.weather.network.WeatherAPI;
+import com.example.weather.preferences.PreferenceObserver;
 import com.example.weather.preferences.Preferences;
 import com.example.weather.settings.SettingsActivity;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements NetworkRequestCallback<List<Forecast>>, OnForecastCLickListener {
+public class MainActivity extends AppCompatActivity implements
+    NetworkRequestCallback<List<Forecast>>,
+    OnForecastCLickListener,
+    PreferenceObserver {
 
     private Toolbar toolbar;
     private RecyclerView listView;
@@ -41,6 +45,9 @@ public class MainActivity extends AppCompatActivity implements NetworkRequestCal
         initErrorView();
 
         refreshForecast();
+
+        // Register Observer
+        Preferences.getInstance().registerObserver(this);
     }
 
     private void initToolbar() {
@@ -115,5 +122,21 @@ public class MainActivity extends AppCompatActivity implements NetworkRequestCal
         Intent activity = new Intent(this, DetailsActivity.class);
         activity.putExtra(DetailsActivity.FORECAST_EXTRA, item);
         startActivity(activity);
+    }
+
+    @Override
+    public void preferenceChanged(String key, Object value) {
+        // We got notified that something changed in the Preferences!
+        refreshForecast();
+        if (key.equals(Preferences.CITY_KEY) && value instanceof String) {
+            toolbar.setTitle((String) value);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Unregister observer to avoid memory leaks
+        Preferences.getInstance().unregisterObserver(this);
     }
 }
