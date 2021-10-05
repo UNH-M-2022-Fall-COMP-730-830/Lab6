@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Weather</string>
+    <string name="settings">Settings</string>
+    <string name="city_setting">City</string>
+    <string name="units_setting">Units</string>
+    <string name="imperial">Imperial (F)</string>
+    <string name="metric">Metric (C)</string>
+    <string name="scientific">Scientific (K)</string>
+    <string name="retry">Retry</string>
+    <string name="error_message">Something went wrong. \nPlease try again.</string>
+    <string name="city_dialog_hint">City, State</string>
+    <string name="city_dialog_title">Enter City</string>
+    <string name="city_dialog_ok">OK</string>
+    <string name="city_dialog_cancel">Cancel</string>
+</resources>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".settings.SettingsActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        style="@style/Widget.MaterialComponents.Toolbar.Primary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:title="@string/settings" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="8dp" />
+
+    <LinearLayout
+        android:id="@+id/cityContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:minHeight="?android:attr/listPreferredItemHeight"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="@string/city_setting"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+
+        <TextView
+            android:id="@+id/cityName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+            tools:text="Manchester, NH" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/dividerHorizontal" />
+
+    <LinearLayout
+        android:id="@+id/unitsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/white"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="12dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="@string/units_setting"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+
+        <RadioGroup
+            android:id="@+id/unitsGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/unitImperial"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/imperial" />
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/unitMetric"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/metric" />
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/unitScientific"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/scientific" />
+        </RadioGroup>
+    </LinearLayout>
+
+
+</LinearLayout>
